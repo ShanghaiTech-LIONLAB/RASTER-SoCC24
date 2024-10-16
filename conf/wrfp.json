@@ -1,0 +1,9 @@
+{
+    "filepath": "/RASTER/data/wrf.nc",
+    "nprocs": 4,
+    "hostfile": "",
+    "mask": "LANDMASK",
+    "varname": "TestVar",
+    "scale": 10,
+    "outfn": "/mnt/RASTER-TEST/TEST/output.nc"
+}
