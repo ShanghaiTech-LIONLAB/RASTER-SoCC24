@@ -16,6 +16,10 @@ def benchmark(conf, times):
     fpath   = conf['filepath']
     nprocs  = conf['nprocs']
     host    = conf['hostfile']
+    if len(host) > 0:
+        hostfile = ['--hostfile', host]
+    else:
+        hostfile = []
     mask    = conf['mask']
     varname = conf['varname']
     scale   = conf['scale']
@@ -27,8 +31,10 @@ def benchmark(conf, times):
     os.makedirs(outdir, exist_ok=True)
 
     drop_cache()
+    
+    mpirun = ['mpirun'] + hostfile
 
-    convertargs  = ['mpirun', '--allow-run-as-root', '-np', str(nprocs), './test_convert', fpath, outfn, mask, varname, str(scale)]
+    convertargs  = mpirun + ['--allow-run-as-root', '-np', str(nprocs), './test_convert', fpath, outfn, mask, varname, str(scale)]
     print(' '.join(convertargs))
 
     proc = subprocess.Popen(convertargs, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
@@ -38,25 +44,17 @@ def benchmark(conf, times):
     c1 = np.average([float(i) for i in re.compile('Time_ordinary_netCDF=([.\d]+)s').findall(out)])
     c2 = np.average([float(i) for i in re.compile('Time_RASTER=([.\d]+)s').findall(out)])
 
-    adiosconvertargs = ['mpirun', '--allow-run-as-root', '-np', str(nprocs), './test_convert_adios', fpath, outfn, mask, varname, str(scale)]
-    print(' '.join(adiosconvertargs))
-    adiosconvertproc = subprocess.Popen(adiosconvertargs, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-    out  = adiosconvertproc.stdout.read().decode('ASCII')
-    # print(out)
-
-    c3 = np.average([float(i) for i in re.compile('Time_adios2=([.\d]+)s').findall(out)])
-
-    print("Convert time:", c1, c2, c3)
+    print("Convert time:", c1, c2)
 
     os.system("echo 3 > /proc/sys/vm/drop_caches")
 
     result = list()
 
-    for _ in range(times):
+    for time in range(times):
 
         drop_cache()
 
-        readargs = ['mpirun', '--allow-run-as-root', '-np', str(nprocs), './test_benchmark', 
+        readargs = mpirun + ['--allow-run-as-root', '-np', str(nprocs), './test_benchmark', 
                     prefix+"_plain.nc", prefix+"_region.nc", varname]    
         print(' '.join(readargs))
         
@@ -73,24 +71,13 @@ def benchmark(conf, times):
 
         drop_cache()
 
-        adiosargs = ['mpirun', '--allow-run-as-root', '-np', str(nprocs), './test_benchmark_adios', 
-                        prefix+"_adios.nc", varname]
-        print(' '.join(adiosargs))
+        print("Time: ", time, r1, r2)
 
-        proc = subprocess.Popen(adiosargs, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-        out  = proc.stdout.read().decode('ASCII') 
-
-        #  print(out)
-
-        assert len(re.compile('Time_adios2_Read=([.\d]+)s').findall(out)) == nprocs
-        r3 = np.average([float(i) for i in re.compile('Time_adios2_Read=([.\d]+)s').findall(out)])
-
-        # print(r1, r2, r3)
-        result.append((r1, r2, r3))
+        result.append((r1, r2))
 
     print(result)
     print('Read time:', np.average(result, axis=0))
-    return (r1, r2, r3)
+    return (r1, r2)
 
 
 if __name__ == '__main__':

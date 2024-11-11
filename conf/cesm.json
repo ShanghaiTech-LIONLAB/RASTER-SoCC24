@@ -1,9 +1,9 @@
 {
     "filepath": "../data/example_cesm.nc",
     "nprocs": 1,
-    "hostfile": "",
+    "hostfile": "hostfile",
     "mask": "REGION_MASK",
     "varname": "CaCO3_FLUX_IN",
-    "scale": 1,
-    "outfn": "/mnt/nvme1/RASTER-TEST/TEST/output.nc"
+    "scale": 10,
+    "outfn": "/mnt/nvme0/RASTER-TEST/TEST/output.nc"
 }

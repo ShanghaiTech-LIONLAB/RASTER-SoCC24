@@ -84,7 +84,7 @@ int main(int argc, char **argv)
     chunksize[ndims - 2] /= DIM2_NCHUNKS;
     status = nc_def_var(ncid, varname.c_str(), NC_FLOAT, ndims, dimids, &varid); ERR;
     // for (int i = 0; i < ndims; i++)
-    // status = nc_def_var_chunking(ncid, varid, NC_CHUNKED, chunksize); ERR;
+    status = nc_def_var_chunking(ncid, varid, NC_CHUNKED, chunksize); ERR;
     auto t3 = high_resolution_clock::now();
     status = nc_put_var_float(ncid, varid, buffer); ERR;
     nc_close(ncid); ERR;

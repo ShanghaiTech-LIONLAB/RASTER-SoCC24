@@ -6,7 +6,6 @@
 #include <netcdf.h>
 #include <assert.h>
 #include <mpi.h>
-#include <adios2.h>
 #include "../raster.h"
 #define ERR do{ if (status != NC_NOERR){ printf("Error at line %d: %s\n", __LINE__, nc_strerror(status)); exit(status);} } while(0);
 using namespace std::chrono;
